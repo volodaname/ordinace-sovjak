@@ -13,11 +13,25 @@
       margin: 0;
       background: #f3f4f6;
       color: #111827;
+      font-size: 16px;
     }
+
+    /* Témata vzhledu */
+    body.theme-blue header { background: #0f172a; }
+    body.theme-blue .btn-primary { background: #1d4ed8; }
+    body.theme-blue .logo-icon { border-color: #38bdf8; }
+
+    body.theme-green header { background: #064e3b; }
+    body.theme-green .btn-primary { background: #16a34a; }
+    body.theme-green .logo-icon { border-color: #4ade80; }
+
+    body.large-text {
+      font-size: 17.5px;
+    }
+
     .page { min-height: 100vh; display: flex; flex-direction: column; }
 
     header {
-      background: #0f172a;
       color: #f9fafb;
       padding: 1.4rem 1.25rem;
     }
@@ -37,6 +51,7 @@
       border: 2px solid #38bdf8;
       display: flex; align-items: center; justify-content: center;
       font-weight: 700; font-size: 1.1rem;
+      background: rgba(15,23,42,0.25);
     }
     .logo-text h1 {
       margin: 0;
@@ -318,7 +333,7 @@
     }
   </style>
 </head>
-<body>
+<body class="theme-blue">
 <div class="page">
   <header>
     <div class="container">
@@ -400,7 +415,7 @@
           </span>
         </div>
 
-        <!-- Správa textů (vidí jen lékař) -->
+        <!-- Správa textů + vzhled -->
         <div id="contentEdit" class="content-edit">
           <h3>Správa textů stránky</h3>
           <div class="edit-grid">
@@ -427,6 +442,26 @@
           </div>
           <div class="edit-actions">
             <button id="saveHeaderBtn" class="btn-primary">Uložit texty</button>
+          </div>
+
+          <h3 style="margin-top:1rem;">Nastavení vzhledu</h3>
+          <div class="edit-grid">
+            <div class="edit-field">
+              <label for="themeColorSelect">Hlavní barva</label>
+              <select id="themeColorSelect">
+                <option value="blue">Modrá (výchozí)</option>
+                <option value="green">Zelená</option>
+              </select>
+            </div>
+            <div class="edit-field">
+              <label>
+                <input type="checkbox" id="largeTextCheckbox" />
+                Větší písmo pro lepší čitelnost
+              </label>
+            </div>
+          </div>
+          <div class="edit-actions">
+            <button id="saveThemeBtn" class="btn-primary">Uložit vzhled</button>
           </div>
         </div>
       </section>
@@ -469,19 +504,28 @@
           <ul id="servicesList" class="services-list">
             <!-- generuje skript -->
           </ul>
-          <div class="chips">
-            <div class="chip">Objednání telefonicky</div>
-            <div class="chip">Akutní pacienti</div>
-            <div class="chip">Očkování proti chřipce</div>
+
+          <div class="chips" id="chipsContainer">
+            <!-- generují se podle textu -->
           </div>
+
           <div id="servicesEdit" class="content-edit">
             <h3>Úprava služeb</h3>
             <div class="edit-field">
               <label for="editServicesText">Jedna služba na každý řádek</label>
               <textarea id="editServicesText"></textarea>
             </div>
+
+            <h3 style="margin-top:0.9rem;">Štítky pod službami</h3>
+            <div class="edit-field">
+              <label for="editChipsText">
+                Krátké štítky – každý na vlastní řádek (např. „Objednání telefonicky“)
+              </label>
+              <textarea id="editChipsText"></textarea>
+            </div>
+
             <div class="edit-actions">
-              <button id="saveServicesBtn" class="btn-primary">Uložit služby</button>
+              <button id="saveServicesBtn" class="btn-primary">Uložit služby a štítky</button>
             </div>
           </div>
         </div>
@@ -541,7 +585,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
 <script>
-  // SEM ZKOPÍRUJ SVŮJ EXISTUJÍCÍ firebaseConfig Z PŮVODNÍ STRÁNKY!
+  // SEM ZADEJ STEJNÉ HODNOTY JAKO DŘÍV
   const firebaseConfig = {
     apiKey: "AIzaSyCcv-7VNuwciddrdX_jV3lLFfxdW0Zvfyo",
     authDomain: "ordinace-sovjak.firebaseapp.com",
@@ -598,6 +642,8 @@
 
   const servicesList = document.getElementById("servicesList");
   const editServicesText = document.getElementById("editServicesText");
+  const editChipsText = document.getElementById("editChipsText");
+  const chipsContainer = document.getElementById("chipsContainer");
   const saveServicesBtn = document.getElementById("saveServicesBtn");
 
   const contactAddressEl = document.getElementById("contactAddress");
@@ -612,6 +658,10 @@
   const hoursEdit = document.getElementById("hoursEdit");
   const servicesEdit = document.getElementById("servicesEdit");
   const contactEdit = document.getElementById("contactEdit");
+
+  const themeColorSelect = document.getElementById("themeColorSelect");
+  const largeTextCheckbox = document.getElementById("largeTextCheckbox");
+  const saveThemeBtn = document.getElementById("saveThemeBtn");
 
   let isDoctor = false;
 
@@ -730,6 +780,25 @@
     });
   }
 
+  function renderChips(data) {
+    const text = data.chipsText || [
+      "Objednání telefonicky",
+      "Akutní pacienti",
+      "Očkování proti chřipce"
+    ].join("\n");
+
+    editChipsText.value = text;
+
+    const labels = text.split("\n").map(l => l.trim()).filter(Boolean);
+    chipsContainer.innerHTML = "";
+    labels.forEach(label => {
+      const div = document.createElement("div");
+      div.className = "chip";
+      div.textContent = label;
+      chipsContainer.appendChild(div);
+    });
+  }
+
   function renderContact(data) {
     contactAddressEl.textContent = data.contactAddress || "Ulice 123, 000 00 Město";
     contactPhoneEl.textContent = data.contactPhone || "+420 000 000 000";
@@ -738,6 +807,19 @@
     editContactAddress.value = contactAddressEl.textContent;
     editContactPhone.value = contactPhoneEl.textContent;
     editContactEmail.value = contactEmailEl.textContent;
+  }
+
+  function renderTheme(data) {
+    const themeColor = data.themeColor || "blue";
+    const largeText = !!data.largeText;
+
+    document.body.classList.remove("theme-blue", "theme-green");
+    document.body.classList.add(themeColor === "green" ? "theme-green" : "theme-blue");
+
+    document.body.classList.toggle("large-text", largeText);
+
+    themeColorSelect.value = themeColor;
+    largeTextCheckbox.checked = largeText;
   }
 
   const docRef = db.collection("ordinace").doc("sovjak");
@@ -756,7 +838,9 @@
     renderHeader(data);
     renderHours(data);
     renderServices(data);
+    renderChips(data);
     renderContact(data);
+    renderTheme(data);
   }, err => {
     console.error(err);
     statusTextEl.textContent = "Nepodařilo se načíst data.";
@@ -826,11 +910,12 @@
     try {
       await docRef.update({
         servicesText: editServicesText.value,
+        chipsText: editChipsText.value,
         updatedAt: new Date().toLocaleString("cs-CZ")
       });
     } catch (e) {
       console.error(e);
-      alert("Chyba při ukládání služeb.");
+      alert("Chyba při ukládání služeb/štítků.");
     }
   });
 
@@ -848,7 +933,20 @@
       alert("Chyba při ukládání kontaktu.");
     }
   });
+
+  saveThemeBtn.addEventListener("click", async () => {
+    if (!isDoctor) { alert("Musíte být přihlášen jako lékař."); return; }
+    try {
+      await docRef.update({
+        themeColor: themeColorSelect.value,
+        largeText: largeTextCheckbox.checked,
+        updatedAt: new Date().toLocaleString("cs-CZ")
+      });
+    } catch (e) {
+      console.error(e);
+      alert("Chyba při ukládání vzhledu.");
+    }
+  });
 </script>
 </body>
 </html>
-
