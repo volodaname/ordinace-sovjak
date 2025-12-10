@@ -16,14 +16,26 @@
       font-size: 16px;
     }
 
-    /* Témata vzhledu */
-    body.theme-blue header { background: #0f172a; }
+    /* === TÉMATA VZHLEDU ======================================= */
+    body.theme-blue header       { background: #0f172a; }
     body.theme-blue .btn-primary { background: #1d4ed8; }
-    body.theme-blue .logo-icon { border-color: #38bdf8; }
+    body.theme-blue .logo-ring   { stroke: #38bdf8; }
 
-    body.theme-green header { background: #064e3b; }
+    body.theme-green header       { background: #064e3b; }
     body.theme-green .btn-primary { background: #16a34a; }
-    body.theme-green .logo-icon { border-color: #4ade80; }
+    body.theme-green .logo-ring   { stroke: #4ade80; }
+
+    body.theme-teal header        { background: #115e59; }
+    body.theme-teal .btn-primary  { background: #0d9488; }
+    body.theme-teal .logo-ring    { stroke: #2dd4bf; }
+
+    body.theme-purple header       { background: #4c1d95; }
+    body.theme-purple .btn-primary { background: #7c3aed; }
+    body.theme-purple .logo-ring   { stroke: #a855f7; }
+
+    body.theme-amber header        { background: #78350f; }
+    body.theme-amber .btn-primary  { background: #d97706; }
+    body.theme-amber .logo-ring    { stroke: #fbbf24; }
 
     body.large-text {
       font-size: 17.5px;
@@ -33,10 +45,10 @@
 
     header {
       color: #f9fafb;
-      padding: 1.4rem 1.25rem;
+      padding: 1.4rem 1.25rem 1.1rem;
     }
     header .container {
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
@@ -46,12 +58,14 @@
     }
     .logo { display: flex; gap: 0.9rem; align-items: center; }
     .logo-icon {
-      width: 40px; height: 40px;
+      width: 44px; height: 44px;
       border-radius: 999px;
-      border: 2px solid #38bdf8;
       display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 1.1rem;
-      background: rgba(15,23,42,0.25);
+      background: rgba(15,23,42,0.35);
+      padding: 4px;
+    }
+    .logo-icon svg {
+      width: 100%; height: 100%;
     }
     .logo-text h1 {
       margin: 0;
@@ -73,13 +87,13 @@
       padding: 1.5rem 1.25rem 2.4rem;
     }
     .content {
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.4fr);
       gap: 1.6rem;
     }
-    @media (max-width: 840px) {
+    @media (max-width: 900px) {
       .content {
         grid-template-columns: minmax(0, 1fr);
       }
@@ -210,7 +224,8 @@
       margin-bottom: 0.15rem;
     }
     .edit-field input,
-    .edit-field textarea {
+    .edit-field textarea,
+    .edit-field select {
       width: 100%;
       border-radius: 0.55rem;
       border: 1px solid #d1d5db;
@@ -281,6 +296,15 @@
       background: #f9fafb;
     }
 
+    .place-photo {
+      width: 100%;
+      border-radius: 0.9rem;
+      margin-top: 0.5rem;
+      border: 1px solid #e5e7eb;
+      object-fit: cover;
+      max-height: 220px;
+    }
+
     .login-panel {
       display: none;
       margin-top: 0.5rem;
@@ -324,7 +348,7 @@
       color: #6b7280;
     }
     footer .container {
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
@@ -338,7 +362,15 @@
   <header>
     <div class="container">
       <div class="logo">
-        <div class="logo-icon">RS</div>
+        <div class="logo-icon">
+          <!-- Jednoduché medicínské logo RS -->
+          <svg viewBox="0 0 48 48" aria-hidden="true">
+            <circle cx="24" cy="24" r="20" fill="none" stroke-width="2.4" class="logo-ring" />
+            <rect x="21" y="14" width="6" height="18" rx="1.5" fill="#f9fafb"/>
+            <rect x="17" y="18" width="14" height="6" rx="1.5" fill="#f9fafb"/>
+            <text x="24" y="34" text-anchor="middle" fill="#f9fafb" font-size="10" font-weight="700">RS</text>
+          </svg>
+        </div>
         <div class="logo-text">
           <h1 id="headerTitle">Ordinace Dr. Richarda Sovjaka</h1>
           <p id="headerSubtitle">Praktický lékař &middot; aktuální informace pro pacienty</p>
@@ -451,6 +483,9 @@
               <select id="themeColorSelect">
                 <option value="blue">Modrá (výchozí)</option>
                 <option value="green">Zelená</option>
+                <option value="teal">Tyrkysová</option>
+                <option value="purple">Fialová</option>
+                <option value="amber">Oranžová</option>
               </select>
             </div>
             <div class="edit-field">
@@ -506,7 +541,7 @@
           </ul>
 
           <div class="chips" id="chipsContainer">
-            <!-- generují se podle textu -->
+            <!-- generujeme štítky -->
           </div>
 
           <div id="servicesEdit" class="content-edit">
@@ -537,13 +572,13 @@
             <span>Kontakt</span>
           </div>
           <p style="font-size:0.9rem; margin:0 0 0.25rem;">
-            Adresa: <span id="contactAddress">Ulice 123, 000 00 Město</span>
+            Adresa: <strong id="contactAddress">Pražská 2198, 256 01 Benešov u Prahy</strong>
           </p>
           <p style="font-size:0.9rem; margin:0 0 0.25rem;">
-            Telefon: <strong id="contactPhone">+420 000 000 000</strong>
+            Telefon: <strong id="contactPhone">+420 317 727 260</strong>
           </p>
           <p style="font-size:0.9rem; margin:0;">
-            E-mail: <strong id="contactEmail">ordinace@priklad.cz</strong>
+            E-mail: <strong id="contactEmail">r.sovjak@seznam.cz</strong>
           </p>
 
           <div id="contactEdit" class="content-edit">
@@ -567,6 +602,19 @@
             </div>
           </div>
         </div>
+
+        <hr style="margin:1.3rem 0; border:none; border-top:1px solid #e5e7eb;">
+
+        <div>
+          <div class="section-title">
+            <span>Kde nás najdete</span>
+          </div>
+          <p class="muted" style="font-size:0.9rem; margin:0 0 0.4rem;">
+            Budova ordinace v Benešově u Prahy. Fotku můžete kdykoli nahradit aktuální.
+          </p>
+          <!-- Sem stačí nahrát soubor ordinace-budova.jpg do GitHub repozitáře -->
+          <img src="ordinace-budova.jpg" alt="Budova ordinace" class="place-photo">
+        </div>
       </section>
     </div>
   </main>
@@ -585,9 +633,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
 <script>
-  // SEM ZADEJ STEJNÉ HODNOTY JAKO DŘÍV
+  // Konfigurace Firebase – nechávám ti ji sem už vyplněnou
   const firebaseConfig = {
-    apiKey: "AIzaSyCcv-7VNuwciddrdX_jV3lLFfxdW0Zvfyo",
+    apiKey: "AIzaSyCcv-7NVwciiddr0X_jV3LLFrfxWDZwYfo",
     authDomain: "ordinace-sovjak.firebaseapp.com",
     projectId: "ordinace-sovjak"
   };
@@ -720,7 +768,7 @@
 
   function renderHeader(data) {
     headerTitleEl.textContent = data.headerTitle || "Ordinace Dr. Richarda Sovjaka";
-    headerSubtitleEl.textContent = data.headerSubtitle || "Praktický lékař &middot; aktuální informace pro pacienty";
+    headerSubtitleEl.textContent = data.headerSubtitle || "Praktický lékař · aktuální informace pro pacienty";
     doctorNameEl.textContent = data.doctorName || "Dr. Richard Sovjak";
     doctorTitleEl.textContent = data.doctorTitle || "Praktický lékař pro dospělé";
     introTextEl.textContent = data.introText || "Informace o provozu ordinace a aktuálních změnách.";
@@ -800,21 +848,27 @@
   }
 
   function renderContact(data) {
-    contactAddressEl.textContent = data.contactAddress || "Ulice 123, 000 00 Město";
-    contactPhoneEl.textContent = data.contactPhone || "+420 000 000 000";
-    contactEmailEl.textContent = data.contactEmail || "ordinace@priklad.cz";
+    contactAddressEl.textContent = data.contactAddress || "Pražská 2198, 256 01 Benešov u Prahy";
+    contactPhoneEl.textContent   = data.contactPhone   || "+420 317 727 260";
+    contactEmailEl.textContent   = data.contactEmail   || "r.sovjak@seznam.cz";
 
     editContactAddress.value = contactAddressEl.textContent;
-    editContactPhone.value = contactPhoneEl.textContent;
-    editContactEmail.value = contactEmailEl.textContent;
+    editContactPhone.value   = contactPhoneEl.textContent;
+    editContactEmail.value   = contactEmailEl.textContent;
   }
 
   function renderTheme(data) {
     const themeColor = data.themeColor || "blue";
-    const largeText = !!data.largeText;
+    const largeText  = !!data.largeText;
 
-    document.body.classList.remove("theme-blue", "theme-green");
-    document.body.classList.add(themeColor === "green" ? "theme-green" : "theme-blue");
+    document.body.classList.remove("theme-blue", "theme-green", "theme-teal", "theme-purple", "theme-amber");
+    const cls =
+      themeColor === "green"  ? "theme-green"  :
+      themeColor === "teal"   ? "theme-teal"   :
+      themeColor === "purple" ? "theme-purple" :
+      themeColor === "amber"  ? "theme-amber"  :
+                                "theme-blue";
+    document.body.classList.add(cls);
 
     document.body.classList.toggle("large-text", largeText);
 
@@ -924,8 +978,8 @@
     try {
       await docRef.update({
         contactAddress: editContactAddress.value.trim(),
-        contactPhone: editContactPhone.value.trim(),
-        contactEmail: editContactEmail.value.trim(),
+        contactPhone:   editContactPhone.value.trim(),
+        contactEmail:   editContactEmail.value.trim(),
         updatedAt: new Date().toLocaleString("cs-CZ")
       });
     } catch (e) {
@@ -939,7 +993,7 @@
     try {
       await docRef.update({
         themeColor: themeColorSelect.value,
-        largeText: largeTextCheckbox.checked,
+        largeText:  largeTextCheckbox.checked,
         updatedAt: new Date().toLocaleString("cs-CZ")
       });
     } catch (e) {
