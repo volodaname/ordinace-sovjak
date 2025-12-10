@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ordinace Dr. Richarda Sovjaka</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f3f4f6; color: #111827; }
+
+    .page { min-height: 100vh; display: flex; flex-direction: column; }
+
+    header { background: #0f172a; color: #f9fafb; padding: 1.5rem 1.25rem; }
+    header .container {
+      max-width: 1000px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1.5rem; flex-wrap: wrap;
+    }
+    .logo { display: flex; align-items: center; gap: 1rem; }
+    .logo-icon {
+      width: 40px; height: 40px; border-radius: 999px;
+      border: 2px solid #38bdf8;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1.1rem;
+    }
+    .logo-text h1 { margin: 0; font-size: 1.4rem; }
+    .logo-text p { margin: 0.1rem 0 0; font-size: 0.9rem; opacity: 0.85; }
+
+    main { flex: 1; padding: 1.5rem 1.25rem 2.5rem; }
+    .content {
+      max-width: 1000px; margin: 0 auto;
+      display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
+      gap: 1.75rem;
+    }
+    @media (max-width: 840px) { .content { grid-template-columns: minmax(0, 1fr); } }
+
+    .card {
+      background: #ffffff; border-radius: 1.25rem;
+      padding: 1.5rem 1.4rem;
+      box-shadow: 0 18px 40px rgba(15,23,42,0.08);
+    }
+
+    .doctor { display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; }
+    .doctor-photo {
+      flex: 0 0 140px; max-width: 160px;
+      border-radius: 1.25rem; overflow: hidden; border: 3px solid #e5e7eb;
+    }
+    .doctor-photo img { width: 100%; display: block; height: auto; }
+    .doctor-info h2 { margin: 0 0 0.2rem; font-size: 1.4rem; }
+    .doctor-info p { margin: 0.15rem 0; font-size: 0.95rem; color: #4b5563; }
+    .muted { color:#6b7280; }
+
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.25rem 0.8rem; border-radius: 999px;
+      font-size: 0.8rem; margin-top: 0.55rem; font-weight: 500;
+    }
+    .status-open { background: #ecfdf3; color: #166534; border: 1px solid #bbf7d0; }
+    .status-closed { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .status-info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .status-pill-dot { width: 0.55rem; height: 0.55rem; border-radius: 999px; background: currentColor; }
+
+    .status-extra { margin-top: 0.4rem; font-size: 0.88rem; color: #374151; }
+
+    .section-title { font-size: 1.1rem; margin: 1.4rem 0 0.8rem; display:flex; justify-content:space-between; gap:.7rem; }
+    .section-title small { font-size: 0.78rem; color: #6b7280; font-weight: 400; }
+
+    .status-buttons { display:none; flex-wrap:wrap; gap:.4rem; margin-bottom:.4rem; }
+    .status-btn {
+      border-radius:999px; border:1px solid #d1d5db;
+      background:#f9fafb; padding:.3rem .8rem;
+      font-size:.8rem; cursor:pointer;
+    }
+    .status-btn:hover { background:#e5e7eb; }
+
+    .note-edit { display:none; margin-top:.3rem; }
+    .note-edit textarea {
+      width:100%; min-height:70px; border-radius:.75rem;
+      border:1px solid #d1d5db; padding:.5rem .7rem;
+      font-family:inherit; font-size:.9rem; resize:vertical;
+    }
+    .note-edit button {
+      margin-top:.4rem; border-radius:999px; border:none;
+      padding:.35rem .95rem; font-size:.8rem; cursor:pointer;
+      background:#1d4ed8; color:#f9fafb;
+    }
+    .note-edit button:hover { filter:brightness(1.05); }
+
+    .table { width:100%; border-collapse:collapse; font-size:.9rem; }
+    .table tr+tr td { border-top:1px solid #e5e7eb; }
+    .table td { padding:.35rem 0; }
+    .table td:first-child { color:#4b5563; width:45%; }
+
+    .chips { display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.3rem; }
+    .chip {
+      border-radius:999px; border:1px solid #e5e7eb;
+      padding:.25rem .75rem; font-size:.8rem; background:#f9fafb;
+    }
+
+    footer { padding:1.1rem 1.25rem 1.6rem; font-size:.8rem; color:#6b7280; }
+    footer .container {
+      max-width:1000px; margin:0 auto; display:flex; justify-content:space-between;
+      gap:1rem; flex-wrap:wrap;
+    }
+
+    .login-link { font-size:.8rem; text-decoration:underline; cursor:pointer; }
+    .login-panel {
+      display:none; margin-top:.5rem; padding:.6rem .8rem;
+      border-radius:.75rem; background:#f9fafb; border:1px solid #e5e7eb;
+      font-size:.85rem;
+    }
+    .login-panel input {
+      width:100%; margin:.25rem 0; padding:.3rem .4rem;
+      border-radius:.4rem; border:1px solid #d1d5db;
+      font-size:.85rem;
+    }
+    .login-panel button {
+      margin-top:.3rem; border:none; border-radius:.75rem;
+      padding:.3rem .8rem; font-size:.8rem; cursor:pointer;
+      background:#0f766e; color:white;
+    }
+    .login-panel button.logout { background:#991b1b; margin-left:.5rem; }
+    .login-panel .msg { margin-top:.3rem; min-height:1rem; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="container">
+      <div class="logo">
+        <div class="logo-icon">RS</div>
+        <div class="logo-text">
+          <h1>Ordinace Dr. Richarda Sovjaka</h1>
+          <p>Praktický lékař &middot; aktuální informace pro pacienty</p>
+        </div>
+      </div>
+      <div>
+        <span id="loginToggle" class="login-link">Přihlásit lékaře</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="content">
+      <!-- Levý sloupec -->
+      <section class="card">
+        <div class="doctor">
+          <div class="doctor-photo">
+            <!-- Uprav název podle své fotky -->
+            <img src="doktor.jpg" alt="Fotografie doktora v bílém plášti">
+          </div>
+          <div class="doctor-info">
+            <h2>Dr. Richard Sovjak</h2>
+            <p>Praktický lékař pro dospělé</p>
+            <p class="muted">Informace o provozu ordinace a aktuálních změnách.</p>
+
+            <div id="statusPill" class="status-pill status-open">
+              <span class="status-pill-dot"></span>
+              <span id="statusText">Načítám stav ordinace…</span>
+            </div>
+            <div id="statusExtra" class="status-extra"></div>
+          </div>
+        </div>
+
+        <div class="section-title">
+          <span>Aktuální informace</span>
+          <small>Viditelné pro pacienty</small>
+        </div>
+
+        <div id="statusButtons" class="status-buttons">
+          <button class="status-btn" data-status="open">Ordinace otevřená</button>
+          <button class="status-btn" data-status="closed">Dnes neordinuji</button>
+          <button class="status-btn" data-status="vacation">Dovolená</button>
+          <button class="status-btn" data-status="info">Mimo ordinaci (jiné)</button>
+        </div>
+
+        <div id="noteEdit" class="note-edit">
+          <label for="noteTextarea" style="font-size:0.8rem; color:#6b7280; display:block; margin-bottom:0.2rem;">
+            Podrobnější zpráva pro pacienty
+          </label>
+          <textarea id="noteTextarea" placeholder="Např. Dovolená 12.–20. 8. Zastupuje MUDr. XYZ, tel.…"></textarea>
+          <button id="saveNote">Uložit změnu</button>
+        </div>
+
+        <div class="section-title" style="margin-top:1rem;">
+          <span style="font-size:0.9rem;" class="muted">
+            Poslední změna: <span id="lastUpdate">—</span>
+          </span>
+        </div>
+
+        <!-- Panel pro přihlášení lékaře -->
+        <div id="loginPanel" class="login-panel">
+          <div><strong>Přihlášení lékaře</strong></div>
+          <div>
+            <label>E-mail<br><input type="email" id="emailInput" placeholder="email lékaře"></label>
+          </div>
+          <div>
+            <label>Heslo<br><input type="password" id="passwordInput" placeholder="heslo"></label>
+          </div>
+          <button id="loginBtn">Přihlásit</button>
+          <button id="logoutBtn" class="logout" style="display:none;">Odhlásit</button>
+          <div class="msg" id="loginMsg"></div>
+        </div>
+      </section>
+
+      <!-- Pravý sloupec -->
+      <section class="card">
+        <div>
+          <div class="section-title"><span>Ordinační hodiny</span></div>
+          <table class="table">
+            <tr><td>Pondělí</td><td>8:00 – 12:00, 13:00 – 16:00</td></tr>
+            <tr><td>Úterý</td><td>7:30 – 12:00</td></tr>
+            <tr><td>Středa</td><td>8:00 – 12:00, 13:00 – 17:00</td></tr>
+            <tr><td>Čtvrtek</td><td>8:00 – 12:00</td></tr>
+            <tr><td>Pátek</td><td>8:00 – 12:00</td></tr>
+          </table>
+          <p style="font-size:0.8rem; color:#6b7280; margin-top:0.4rem;">
+            Poslední pacient 30 minut před koncem ordinační doby. U akutních potíží prosíme o telefonické objednání.
+          </p>
+        </div>
+
+        <hr style="margin:1.25rem 0; border:none; border-top:1px solid #e5e7eb;">
+
+        <div>
+          <div class="section-title"><span>Nabízené služby</span></div>
+          <ul style="margin:0 0 0.5rem 1.1rem; padding:0; font-size:0.9rem;">
+            <li>Komplexní péče praktického lékaře pro dospělé</li>
+            <li>Preventivní prohlídky a očkování</li>
+            <li>Vyšetření pro řidičské a zbrojní průkazy</li>
+            <li>Posudky o zdravotní způsobilosti (zaměstnání, školy)</li>
+          </ul>
+          <div class="chips">
+            <div class="chip">Objednání telefonicky</div>
+            <div class="chip">Akutní pacienti</div>
+            <div class="chip">Očkování proti chřipce</div>
+          </div>
+        </div>
+
+        <hr style="margin:1.25rem 0; border:none; border-top:1px solid #e5e7eb;">
+
+        <div>
+          <div class="section-title"><span>Kontakt</span></div>
+          <p style="font-size:0.9rem; margin:0 0 0.25rem;">
+            Adresa: Ulice 123, 000 00 Město
+          </p>
+          <p style="font-size:0.9rem; margin:0 0 0.25rem;">
+            Telefon: <strong>+420 000 000 000</strong>
+          </p>
+          <p style="font-size:0.9rem; margin:0;">
+            E-mail: <strong>ordinace@priklad.cz</strong>
+          </p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div>&copy; <span id="year"></span> Ordinace Dr. Richarda Sovjaka</div>
+      <div class="muted">Informace bez záruky, prosíme ověřte telefonicky.</div>
+    </div>
+  </footer>
+</div>
+
+<!-- Firebase SDK z CDN -->
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
+
+<script>
+  // 1) DOPLŇ SVOJE FIREBASE ÚDAJE
+  const firebaseConfig = {
+    apiKey: "AIzaSyCcv-7VNuwciddrdX_jV3lLFfxdW0Zvfyo",
+    authDomain: "ordinace-sovjak.firebaseapp.com",
+    projectId: "ordinace-sovjak"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const STATUS_CONFIG = {
+    open:   { text:"Ordinace je dnes otevřená.", className:"status-open" },
+    closed: { text:"Dnes neordinuji.", className:"status-closed" },
+    vacation: { text:"Dovolená – ordinace uzavřena.", className:"status-closed" },
+    info:   { text:"Mimo ordinaci – informace v textu níže.", className:"status-info" }
+  };
+
+  const statusPill = document.getElementById("statusPill");
+  const statusTextEl = document.getElementById("statusText");
+  const statusExtraEl = document.getElementById("statusExtra");
+  const lastUpdateEl = document.getElementById("lastUpdate");
+  const yearEl = document.getElementById("year");
+  yearEl.textContent = new Date().getFullYear();
+
+  const statusButtons = document.getElementById("statusButtons");
+  const noteEdit = document.getElementById("noteEdit");
+  const noteTextarea = document.getElementById("noteTextarea");
+  const saveNoteBtn = document.getElementById("saveNote");
+
+  const loginToggle = document.getElementById("loginToggle");
+  const loginPanel = document.getElementById("loginPanel");
+  const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const loginMsg = document.getElementById("loginMsg");
+  const emailInput = document.getElementById("emailInput");
+  const passwordInput = document.getElementById("passwordInput");
+
+  let isDoctor = false;
+  function setDoctorMode(enabled) {
+    isDoctor = enabled;
+    statusButtons.style.display = enabled ? "flex" : "none";
+    noteEdit.style.display = enabled ? "block" : "none";
+    logoutBtn.style.display = enabled ? "inline-block" : "none";
+    loginBtn.style.display = enabled ? "none" : "inline-block";
+    loginMsg.textContent = enabled ? "Přihlášeno." : "";
+    if (enabled) loginToggle.textContent = "Správa ordinace (přihlášeno)";
+    else loginToggle.textContent = "Přihlásit lékaře";
+  }
+
+  loginToggle.addEventListener("click", () => {
+    loginPanel.style.display = loginPanel.style.display === "block" ? "none" : "block";
+  });
+
+  loginBtn.addEventListener("click", async () => {
+    loginMsg.textContent = "Přihlašuji…";
+    try {
+      await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
+      loginMsg.textContent = "Úspěšně přihlášeno.";
+    } catch (e) {
+      console.error(e);
+      loginMsg.textContent = "Chyba přihlášení: " + (e.message || "zkontrolujte e-mail a heslo.");
+    }
+  });
+
+  logoutBtn.addEventListener("click", async () => {
+    await auth.signOut();
+  });
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      setDoctorMode(true);
+    } else {
+      setDoctorMode(false);
+    }
+  });
+
+  function renderStatus(data) {
+    const statusKey = data.status || "open";
+    const conf = STATUS_CONFIG[statusKey] || STATUS_CONFIG.open;
+    statusPill.classList.remove("status-open", "status-closed", "status-info");
+    statusPill.classList.add(conf.className);
+    statusTextEl.textContent = conf.text;
+    statusExtraEl.textContent = data.note || "";
+    lastUpdateEl.textContent = data.updatedAt || "—";
+    noteTextarea.value = data.note || "";
+  }
+
+  const docRef = db.collection("ordinace").doc("sovjak");
+
+  // 2) Načítání dat (živě)
+  docRef.onSnapshot((doc) => {
+    if (doc.exists) {
+      renderStatus(doc.data());
+    } else {
+      // pokud neexistuje, vytvoříme výchozí záznam
+      docRef.set({
+        status: "open",
+        note: "",
+        updatedAt: new Date().toLocaleString("cs-CZ")
+      });
+    }
+  }, (err) => {
+    console.error(err);
+    statusTextEl.textContent = "Nepodařilo se načíst data.";
+  });
+
+  // 3) Změna stavu / textu (jen pro přihlášeného lékaře)
+  document.querySelectorAll(".status-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      if (!isDoctor) { alert("Musíte být přihlášen jako lékař."); return; }
+      const statusKey = btn.getAttribute("data-status");
+      try {
+        await docRef.update({
+          status: statusKey,
+          updatedAt: new Date().toLocaleString("cs-CZ")
+        });
+      } catch (e) {
+        console.error(e);
+        alert("Chyba při ukládání.");
+      }
+    });
+  });
+
+  saveNoteBtn.addEventListener("click", async () => {
+    if (!isDoctor) { alert("Musíte být přihlášen jako lékař."); return; }
+    try {
+      await docRef.update({
+        note: noteTextarea.value.trim(),
+        updatedAt: new Date().toLocaleString("cs-CZ")
+      });
+    } catch (e) {
+      console.error(e);
+      alert("Chyba při ukládání.");
+    }
+  });
+</script>
+</body>
+</html>
+
+
+
