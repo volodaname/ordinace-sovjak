@@ -184,6 +184,16 @@
       font-size: 0.78rem;
       color: #374151;
     }
+    .login-panel .link-button {
+      margin-top: 0.25rem;
+      padding: 0;
+      border: none;
+      background: none;
+      font-size: 0.78rem;
+      text-decoration: underline;
+      color: #1d4ed8;
+      cursor: pointer;
+    }
 
     /* === OBSAH ================================================== */
     main {
@@ -481,6 +491,7 @@
         </div>
         <button id="loginBtn">Přihlásit</button>
         <button id="logoutBtn" class="logout" style="display:none;">Odhlásit</button>
+        <button id="resetPasswordBtn" type="button" class="link-button">Zapomenuté heslo?</button>
         <div class="msg" id="loginMsg"></div>
       </div>
     </div>
@@ -706,15 +717,15 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyCcv-7VNuwciddrdX_jV3lLFfxdW0Zvfyo",
-  authDomain: "ordinace-sovjak.firebaseapp.com",
-  projectId: "ordinace-sovjak",
-  storageBucket: "ordinace-sovjak.firebasestorage.app",
-  messagingSenderId: "656278375840",
-  appId: "1:656278375840:web:b46c55823d1b994b3de8c5",
-  measurementId: "G-6DKH8RY4TP"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyCcv-7NVwciiddr0X_jV3LLFrfxWDZwYfo",
+    authDomain: "ordinace-sovjak.firebaseapp.com",
+    projectId: "ordinace-sovjak",
+    storageBucket: "ordinace-sovjak.appspot.com",
+    messagingSenderId: "656278375840",
+    appId: "1:656278375840:web:b46c55823d1b94b3de8c65",
+    measurementId: "G-6DkHBRY4TP"
+  };
 
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
@@ -762,6 +773,7 @@ const firebaseConfig = {
   const loginPanel   = document.getElementById("loginPanel");
   const loginBtn     = document.getElementById("loginBtn");
   const logoutBtn    = document.getElementById("logoutBtn");
+  const resetPasswordBtn = document.getElementById("resetPasswordBtn");
   const loginMsg     = document.getElementById("loginMsg");
   const emailInput   = document.getElementById("emailInput");
   const passwordInput= document.getElementById("passwordInput");
@@ -836,6 +848,22 @@ const firebaseConfig = {
     await auth.signOut();
   });
 
+  resetPasswordBtn.addEventListener("click", async () => {
+    const email = emailInput.value.trim();
+    if (!email) {
+      loginMsg.textContent = "Zadejte e-mail, na který chcete poslat odkaz pro nové heslo.";
+      return;
+    }
+    loginMsg.textContent = "Odesílám e-mail pro nastavení nového hesla…";
+    try {
+      await auth.sendPasswordResetEmail(email);
+      loginMsg.textContent = "Pokud je tento e-mail registrován, odeslali jsme odkaz pro nastavení nového hesla.";
+    } catch (e) {
+      console.error(e);
+      loginMsg.textContent = "Nepodařilo se odeslat e-mail. Zkontrolujte adresu nebo to zkuste později.";
+    }
+  });
+
   auth.onAuthStateChanged(user => {
     setDoctorMode(!!user);
   });
@@ -844,10 +872,35 @@ const firebaseConfig = {
     return db.collection("ordinace").doc(currentOrdinace);
   }
 
-  function setOrdinaceMeta() {
+  function attachListener() {
     const meta = ORDINACE_META[currentOrdinace];
     placePhoto.src = meta.photo;
     ordinaceLabel.textContent = "Zobrazená ordinace: " + meta.label;
+
+    getDocRef().onSnapshot(async doc => {
+      if (!doc.exists) {
+        const init = {
+          status: "open",
+          note: "",
+          hoursText: "",
+          servicesText: "",
+          chipsText: "",
+          contactDoctor: "Richard Sovják",
+          contactNurse: "Hana Nová",
+          contactAddress: meta.defaultAddress,
+          contactPhone: "+420 317 727 260",
+          contactEmail: "r.sovjak@seznam.cz",
+          updatedAt: new Date().toLocaleString("cs-CZ")
+        };
+        await getDocRef().set(init);
+        return;
+      }
+      lastData = doc.data();
+      renderAll(lastData);
+    }, err => {
+      console.error(err);
+      statusTextEl.textContent = "Nepodařilo se načíst data.";
+    });
   }
 
   function renderStatus(data) {
@@ -977,37 +1030,6 @@ const firebaseConfig = {
     await getDocRef().set(newData);
   }
 
-  function attachListener() {
-    const meta = ORDINACE_META[currentOrdinace];
-    placePhoto.src = meta.photo;
-    ordinaceLabel.textContent = "Zobrazená ordinace: " + meta.label;
-
-    getDocRef().onSnapshot(async doc => {
-      if (!doc.exists) {
-        const init = {
-          status: "open",
-          note: "",
-          hoursText: "",
-          servicesText: "",
-          chipsText: "",
-          contactDoctor: "Richard Sovják",
-          contactNurse: "Hana Nová",
-          contactAddress: meta.defaultAddress,
-          contactPhone: "+420 317 727 260",
-          contactEmail: "r.sovjak@seznam.cz",
-          updatedAt: new Date().toLocaleString("cs-CZ")
-        };
-        await getDocRef().set(init);
-        return;
-      }
-      lastData = doc.data();
-      renderAll(lastData);
-    }, err => {
-      console.error(err);
-      statusTextEl.textContent = "Nepodařilo se načíst data.";
-    });
-  }
-
   // přepínač ordinací
   document.querySelectorAll(".ordinace-btn").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -1113,6 +1135,3 @@ const firebaseConfig = {
 </script>
 </body>
 </html>
-
-
-
