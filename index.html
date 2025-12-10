@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <title>OBVODNÍ LÉKAŘ MUDr. RICHARD SOVJÁK</title>
+  <title>Ordinace obvodního lékaře MUDr. Richarda Sovjáka</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     :root {
@@ -91,6 +91,8 @@
       margin: 0.4rem auto 0.3rem;
       position: relative;
       z-index: 1;
+      display: flex;
+      justify-content: flex-end;  /* panel vpravo */
     }
     .login-panel {
       display: none;
@@ -145,7 +147,7 @@
       margin: 0 auto;
       padding: 0 1.25rem 0.2rem;
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;   /* doprava */
       gap: 0.5rem;
       flex-wrap: wrap;
     }
@@ -188,6 +190,10 @@
     @media (max-width: 900px) {
       .content {
         grid-template-columns: minmax(0, 1fr);
+      }
+      .login-panel-wrapper,
+      .ordinace-switch-wrap {
+        justify-content: center; /* na mobilu doprostřed */
       }
       .login-panel-wrapper,
       .ordinace-switch-wrap {
@@ -435,7 +441,7 @@
           </svg>
         </div>
         <div class="logo-text">
-          <h1 id="headerTitle">Ordinace Dr. Richarda Sovjaka</h1>
+          <h1 id="headerTitle">Ordinace obvodního lékaře MUDr. Richarda Sovjáka</h1>
           <p id="headerSubtitle">Praktický lékař – aktuální informace pro pacienty</p>
         </div>
       </div>
@@ -496,7 +502,7 @@
 
         <div class="section-title">
           <span>Aktuální informace</span>
-          <small>Viditelné pro pacienty</small>
+      
         </div>
 
         <div id="statusButtons" class="status-buttons admin-section">
@@ -622,8 +628,14 @@
           <p style="font-size:0.9rem; margin:0 0 0.25rem;">
             Telefon: <strong id="contactPhone">+420 317 727 260</strong>
           </p>
-          <p style="font-size:0.9rem; margin:0;">
+          <p style="font-size:0.9rem; margin:0 0 0.25rem;">
             E-mail: <strong id="contactEmail">r.sovjak@seznam.cz</strong>
+          </p>
+          <p style="font-size:0.9rem; margin:0.25rem 0 0.25rem;">
+            Lékař: <strong id="contactDoctor">Richard Sovják</strong>
+          </p>
+          <p style="font-size:0.9rem; margin:0;">
+            Zdravotní sestra: <strong id="contactNurse">Hana Nová</strong>
           </p>
 
           <div id="contactEdit" class="admin-section">
@@ -640,6 +652,14 @@
               <div class="edit-field">
                 <label for="editContactEmail">E-mail</label>
                 <input id="editContactEmail" type="text" />
+              </div>
+              <div class="edit-field">
+                <label for="editContactDoctor">Lékař</label>
+                <input id="editContactDoctor" type="text" />
+              </div>
+              <div class="edit-field">
+                <label for="editContactNurse">Zdravotní sestra</label>
+                <input id="editContactNurse" type="text" />
               </div>
             </div>
             <div class="edit-actions">
@@ -707,12 +727,11 @@
     naceradec: {
       label: "Načeradec",
       photo: "ordinace-naceradec.jpg",
-      defaultAddress: "Načeradec – doplňte adresu",
+      defaultAddress: "Načeradec – doplňte adresu"
     }
   };
 
   let currentOrdinace = "benesov";
-  let unsubscribe = null;
   let lastData = null;
   let isDoctor = false;
 
@@ -755,7 +774,7 @@
   const editHoursText= document.getElementById("editHoursText");
   const saveHoursBtn = document.getElementById("saveHoursBtn");
 
-  const servicesList   = document.getElementById("servicesList");
+  const servicesList     = document.getElementById("servicesList");
   const editServicesText = document.getElementById("editServicesText");
   const editChipsText    = document.getElementById("editChipsText");
   const chipsContainer   = document.getElementById("chipsContainer");
@@ -764,9 +783,14 @@
   const contactAddressEl   = document.getElementById("contactAddress");
   const contactPhoneEl     = document.getElementById("contactPhone");
   const contactEmailEl     = document.getElementById("contactEmail");
+  const contactDoctorEl    = document.getElementById("contactDoctor");
+  const contactNurseEl     = document.getElementById("contactNurse");
+
   const editContactAddress = document.getElementById("editContactAddress");
   const editContactPhone   = document.getElementById("editContactPhone");
   const editContactEmail   = document.getElementById("editContactEmail");
+  const editContactDoctor  = document.getElementById("editContactDoctor");
+  const editContactNurse   = document.getElementById("editContactNurse");
   const saveContactBtn     = document.getElementById("saveContactBtn");
 
   const contentEdit = document.getElementById("contentEdit");
@@ -830,7 +854,7 @@
   }
 
   function renderHeader(data) {
-    headerTitleEl.textContent    = data.headerTitle   || "Ordinace Dr. Richarda Sovjaka";
+    headerTitleEl.textContent    = data.headerTitle   || "Ordinace obvodního lékaře MUDr. Richarda Sovjáka";
     headerSubtitleEl.textContent = data.headerSubtitle|| "Praktický lékař – aktuální informace pro pacienty";
     doctorNameEl.textContent     = data.doctorName    || "Dr. Richard Sovjak";
     doctorTitleEl.textContent    = data.doctorTitle   || "Praktický lékař pro dospělé";
@@ -915,10 +939,14 @@
     contactAddressEl.textContent = data.contactAddress || meta.defaultAddress;
     contactPhoneEl.textContent   = data.contactPhone   || "+420 317 727 260";
     contactEmailEl.textContent   = data.contactEmail   || "r.sovjak@seznam.cz";
+    contactDoctorEl.textContent  = data.contactDoctor  || "Richard Sovják";
+    contactNurseEl.textContent   = data.contactNurse   || "Hana Nová";
 
     editContactAddress.value = contactAddressEl.textContent;
     editContactPhone.value   = contactPhoneEl.textContent;
     editContactEmail.value   = contactEmailEl.textContent;
+    editContactDoctor.value  = contactDoctorEl.textContent;
+    editContactNurse.value   = contactNurseEl.textContent;
   }
 
   function renderAll(data) {
@@ -941,11 +969,12 @@
   }
 
   function attachListener() {
-    if (unsubscribe) unsubscribe();
-    setOrdinaceMeta();
+    const meta = ORDINACE_META[currentOrdinace];
+    placePhoto.src = meta.photo;
+    ordinaceLabel.textContent = "Zobrazená ordinace: " + meta.label;
+
     getDocRef().onSnapshot(async doc => {
       if (!doc.exists) {
-        const meta = ORDINACE_META[currentOrdinace];
         const init = {
           status: "open",
           note: "",
@@ -955,6 +984,8 @@
           contactAddress: meta.defaultAddress,
           contactPhone: "+420 317 727 260",
           contactEmail: "r.sovjak@seznam.cz",
+          contactDoctor: "Richard Sovják",
+          contactNurse: "Hana Nová",
           updatedAt: new Date().toLocaleString("cs-CZ")
         };
         await getDocRef().set(init);
@@ -1058,6 +1089,8 @@
         contactAddress: editContactAddress.value.trim(),
         contactPhone:   editContactPhone.value.trim(),
         contactEmail:   editContactEmail.value.trim(),
+        contactDoctor:  editContactDoctor.value.trim(),
+        contactNurse:   editContactNurse.value.trim(),
         updatedAt:      now
       });
     } catch (e) {
@@ -1071,5 +1104,3 @@
 </script>
 </body>
 </html>
-
-
