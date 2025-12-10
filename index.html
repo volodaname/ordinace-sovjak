@@ -1,152 +1,979 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Ordinace Dr. Richarda Sovjaka</title>
-
-<style>
+  <meta charset="UTF-8" />
+  <title>Ordinace Dr. Richarda Sovjaka</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
     body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background-color: #f5f7fa;
+      margin: 0;
+      background: #f3f4f6;
+      color: #111827;
+      font-size: 16px;
     }
 
-    /* HLAVIČKA */
-    .header {
-        width: 100%;
-        height: 260px;
-        background-image: url("header-bg-medical.jpg");
-        background-size: cover;
-        background-position: center;
-        position: relative;
-        display: flex;
-        align-items: center;
-        padding-left: 60px;
-        color: #fff;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    /* === HLAVIČKA S POZADÍM ==================================== */
+    header {
+      position: relative;
+      color: #0f172a;
+      padding: 1.3rem 1.25rem 1rem;
+      overflow: hidden;
+    }
+    header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("header-bg-medical.jpg");
+      background-size: cover;
+      background-position: center;
+      opacity: 0.6;           /* klidně si později doladíš (0.4–0.8) */
+      pointer-events: none;
+    }
+    header .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.2rem;
+      flex-wrap: wrap;
     }
 
     .logo {
-        width: 75px;
-        height: 75px;
-        margin-right: 25px;
+      display: flex;
+      gap: 0.9rem;
+      align-items: center;
+    }
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15,23,42,0.65);
+      padding: 4px;
+    }
+    .logo-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+    .logo-ring { stroke: #0ea5e9; }
+    .logo-text h1 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+    .logo-text p {
+      margin: 0.1rem 0 0;
+      font-size: 0.92rem;
+      color: #1f2933;
     }
 
-    .title-wrap h1 {
-        margin: 0;
-        font-size: 32px;
-        font-weight: bold;
-        color: #0a1b2e;
-        text-shadow: 0px 0px 4px #ffffff;
+    .login-link {
+      font-size: 0.88rem;
+      cursor: pointer;
+      text-decoration: underline;
+      color: #0f172a;
+      background: rgba(255,255,255,0.8);
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
     }
 
-    .title-wrap p {
-        margin: 4px 0 0 0;
-        font-size: 17px;
-        color: #0a1b2e;
-        text-shadow: 0px 0px 4px #ffffff;
+    /* LOGIN panel */
+    .login-panel-wrapper {
+      max-width: 1100px;
+      margin: 0.4rem auto 0.3rem;
+      position: relative;
+      z-index: 1;
+    }
+    .login-panel {
+      display: none;
+      background: #ffffff;
+      border-radius: 0.75rem;
+      padding: 0.8rem 1rem;
+      box-shadow: 0 10px 25px rgba(15,23,42,0.15);
+      max-width: 360px;
+    }
+    .login-panel-title {
+      font-weight: 600;
+      font-size: 0.98rem;
+      margin-bottom: 0.4rem;
+      color: #0f172a;
+    }
+    .login-panel label {
+      font-size: 0.8rem;
+      color: #4b5563;
+    }
+    .login-panel input {
+      width: 100%;
+      margin: 0.2rem 0 0.5rem;
+      padding: 0.3rem 0.45rem;
+      border-radius: 0.5rem;
+      border: 1px solid #d1d5db;
+      font-size: 0.85rem;
+    }
+    .login-panel button {
+      margin-top: 0.35rem;
+      border-radius: 0.75rem;
+      border: none;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      background: #0f766e;
+      color: white;
+    }
+    .login-panel button.logout {
+      background: #b91c1c;
+      margin-left: 0.4rem;
+    }
+    .login-panel .msg {
+      margin-top: 0.3rem;
+      min-height: 1rem;
+      font-size: 0.78rem;
+      color: #374151;
     }
 
-    /* LOGIN SEKCE */
-    .login-container {
-        max-width: 380px;
-        background: white;
-        padding: 25px;
-        margin: 40px auto;
-        border-radius: 12px;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-        text-align: center;
+    /* === OBSAH ================================================== */
+    main {
+      padding: 1.3rem 1.25rem 2.4rem;
+    }
+    .content {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.4fr);
+      gap: 1.6rem;
+    }
+    @media (max-width: 900px) {
+      .content {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .login-panel-wrapper {
+        padding: 0 1.25rem;
+      }
     }
 
-    .login-container h2 {
-        margin-top: 0;
-        margin-bottom: 20px;
-        font-size: 22px;
-        color: #0a1b2e;
+    .card {
+      background: #ffffff;
+      border-radius: 1.25rem;
+      padding: 1.5rem 1.4rem;
+      box-shadow: 0 18px 40px rgba(15,23,42,0.08);
     }
 
-    input {
-        width: 100%;
-        padding: 12px;
-        margin-bottom: 15px;
-        border: 1px solid #ccd1d9;
-        border-radius: 8px;
-        font-size: 15px;
+    .doctor {
+      display: flex;
+      gap: 1.1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .doctor-photo {
+      flex: 0 0 140px;
+      max-width: 160px;
+      border-radius: 1.25rem;
+      overflow: hidden;
+      border: 3px solid #e5e7eb;
+    }
+    .doctor-photo img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .doctor-info h2 {
+      margin: 0 0 0.15rem;
+      font-size: 1.4rem;
+    }
+    .doctor-info p {
+      margin: 0.15rem 0;
+      font-size: 0.95rem;
+      color: #4b5563;
+    }
+    .muted { color: #6b7280; }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.25rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-top: 0.6rem;
+    }
+    .status-pill-dot {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 999px;
+      background: currentColor;
+    }
+    .status-open {
+      background: #ecfdf3;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+    .status-closed {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+    .status-info {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+    .status-extra {
+      margin-top: 0.4rem;
+      font-size: 0.88rem;
+      color: #374151;
+      white-space: pre-line;
     }
 
-    .btn {
-        width: 100%;
-        padding: 12px;
-        background-color: #118be1;
-        border: none;
-        color: white;
-        border-radius: 8px;
-        font-size: 17px;
-        cursor: pointer;
-        transition: 0.2s;
+    .section-title {
+      font-size: 1.05rem;
+      margin: 1.3rem 0 0.7rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .section-title small {
+      font-size: 0.78rem;
+      color: #6b7280;
     }
 
-    .btn:hover {
-        background-color: #0d74b8;
+    .status-buttons {
+      display: none;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.5rem;
+    }
+    .status-btn {
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .status-btn:hover { background: #e5e7eb; }
+
+    .admin-section {
+      display: none;
+      margin-top: 0.5rem;
+      border-top: 1px dashed #e5e7eb;
+      padding-top: 0.7rem;
+    }
+    .admin-section h3 {
+      margin: 0 0 0.4rem;
+      font-size: 0.95rem;
+    }
+    .edit-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.6rem;
+    }
+    .edit-field label {
+      font-size: 0.8rem;
+      color: #4b5563;
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+    .edit-field input,
+    .edit-field textarea {
+      width: 100%;
+      border-radius: 0.55rem;
+      border: 1px solid #d1d5db;
+      padding: 0.4rem 0.55rem;
+      font-family: inherit;
+      font-size: 0.86rem;
+      resize: vertical;
+    }
+    .edit-field textarea {
+      min-height: 60px;
+    }
+    .edit-actions {
+      margin-top: 0.5rem;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .btn-primary,
+    .btn-secondary {
+      border-radius: 999px;
+      border: none;
+      padding: 0.4rem 0.95rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: #1d4ed8;
+      color: #f9fafb;
+    }
+    .btn-primary:hover { filter: brightness(1.05); }
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+    .btn-secondary:hover { filter: brightness(0.98); }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    .table tr + tr td { border-top: 1px solid #e5e7eb; }
+    .table td { padding: 0.3rem 0; }
+    .table td:first-child {
+      width: 42%;
+      color: #4b5563;
     }
 
-</style>
+    .services-list {
+      font-size: 0.9rem;
+      margin: 0;
+      padding-left: 1.1rem;
+    }
+    .services-list li { margin-bottom: 0.15rem; }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.3rem;
+    }
+    .chip {
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.8rem;
+      background: #f9fafb;
+    }
+
+    .place-photo {
+      width: 100%;
+      border-radius: 0.9rem;
+      margin-top: 0.5rem;
+      border: 1px solid #e5e7eb;
+      object-fit: cover;
+      max-height: 220px;
+    }
+
+    footer {
+      padding: 1.1rem 1.25rem 1.6rem;
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+    footer .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+  </style>
 </head>
 <body>
-
-<!-- HLAVIČKA -->
-<div class="header">
-    <img src="logo-rs.png" class="logo" alt="Logo RS" />
-    <div class="title-wrap">
-        <h1>Ordinace Dr. Richarda Sovjaka</h1>
-        <p>Praktický lékař – aktuální informace pro pacienty</p>
+<div class="page">
+  <header>
+    <div class="container">
+      <div class="logo">
+        <div class="logo-icon">
+          <!-- Ostré RS logo v SVG -->
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="27" fill="none" stroke-width="2.8" class="logo-ring" />
+            <circle cx="32" cy="30" r="19" fill="rgba(15,23,42,0.9)" />
+            <rect x="29" y="18" width="6" height="16" rx="1.5" fill="#f9fafb" />
+            <rect x="25" y="22" width="14" height="6" rx="1.5" fill="#f9fafb" />
+            <text x="32" y="47" text-anchor="middle"
+                  fill="#f9fafb" font-size="10" font-weight="700"
+                  font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+              RS
+            </text>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <h1 id="headerTitle">Ordinace Dr. Richarda Sovjaka</h1>
+          <p id="headerSubtitle">Praktický lékař – aktuální informace pro pacienty</p>
+        </div>
+      </div>
+      <div>
+        <span id="loginToggle" class="login-link">Přihlásit lékaře</span>
+      </div>
     </div>
+    <div class="login-panel-wrapper">
+      <div id="loginPanel" class="login-panel">
+        <div class="login-panel-title">Přihlášení lékaře</div>
+        <div>
+          <label>E-mail<br><input type="email" id="emailInput" placeholder="e-mail lékaře"></label>
+        </div>
+        <div>
+          <label>Heslo<br><input type="password" id="passwordInput" placeholder="heslo"></label>
+        </div>
+        <button id="loginBtn">Přihlásit</button>
+        <button id="logoutBtn" class="logout" style="display:none;">Odhlásit</button>
+        <div class="msg" id="loginMsg"></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="content">
+      <!-- LEVÝ SLOUPEC -->
+      <section class="card">
+        <div class="doctor">
+          <div class="doctor-photo">
+            <img src="doktor.jpg" alt="Fotografie doktora">
+          </div>
+          <div class="doctor-info">
+            <h2 id="doctorName">Dr. Richard Sovjak</h2>
+            <p id="doctorTitle">Praktický lékař pro dospělé</p>
+            <p class="muted" id="introText">
+              Informace o provozu ordinace a aktuálních změnách.
+            </p>
+
+            <div id="statusPill" class="status-pill status-open">
+              <span class="status-pill-dot"></span>
+              <span id="statusText">Načítám stav ordinace…</span>
+            </div>
+            <div id="statusExtra" class="status-extra"></div>
+          </div>
+        </div>
+
+        <div class="section-title">
+          <span>Aktuální informace</span>
+          <small>Viditelné pro pacienty</small>
+        </div>
+
+        <div id="statusButtons" class="status-buttons admin-section">
+          <button class="status-btn" data-status="open">Ordinace otevřená</button>
+          <button class="status-btn" data-status="closed">Dnes neordinuji</button>
+          <button class="status-btn" data-status="vacation">Dovolená</button>
+          <button class="status-btn" data-status="info">Mimo ordinaci (jiné)</button>
+        </div>
+
+        <div id="noteEdit" class="admin-section">
+          <div class="edit-field">
+            <label for="noteTextarea">Podrobnější zpráva pro pacienty</label>
+            <textarea id="noteTextarea" placeholder="Např. Dovolená 12.–20. 8. Zastupuje MUDr. XY, tel.…"></textarea>
+          </div>
+          <div class="edit-actions">
+            <button id="saveNoteBtn" class="btn-primary">Uložit aktuální info</button>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top:1.1rem;">
+          <span style="font-size:0.88rem;" class="muted">
+            Poslední změna: <span id="lastUpdate">—</span>
+          </span>
+        </div>
+
+        <div id="contentEdit" class="admin-section">
+          <h3>Správa textů stránky</h3>
+          <div class="edit-grid">
+            <div class="edit-field">
+              <label for="editDoctorName">Jméno lékaře</label>
+              <input id="editDoctorName" type="text" />
+            </div>
+            <div class="edit-field">
+              <label for="editDoctorTitle">Titul / funkce</label>
+              <input id="editDoctorTitle" type="text" />
+            </div>
+            <div class="edit-field">
+              <label for="editHeaderTitle">Nadpis v hlavičce</label>
+              <input id="editHeaderTitle" type="text" />
+            </div>
+            <div class="edit-field">
+              <label for="editHeaderSubtitle">Podnadpis v hlavičce</label>
+              <input id="editHeaderSubtitle" type="text" />
+            </div>
+            <div class="edit-field">
+              <label for="editIntroText">Krátký úvodní text</label>
+              <textarea id="editIntroText"></textarea>
+            </div>
+          </div>
+          <div class="edit-actions">
+            <button id="saveHeaderBtn" class="btn-primary">Uložit texty</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRAVÝ SLOUPEC -->
+      <section class="card">
+        <div>
+          <div class="section-title">
+            <span>Ordinační hodiny</span>
+          </div>
+          <div id="hoursView">
+            <table class="table" id="hoursTable"></table>
+            <p class="muted" style="font-size:0.8rem; margin-top:0.4rem;">
+              Poslední pacient 30 minut před koncem ordinační doby. U akutních potíží prosíme o telefonické objednání.
+            </p>
+          </div>
+          <div id="hoursEdit" class="admin-section">
+            <h3>Úprava ordinačních hodin</h3>
+            <div class="edit-field">
+              <label for="editHoursText">
+                Ordinační hodiny – každý řádek ve formátu „den: text“, např.<br>
+                <span class="muted">Pondělí: 8:00 – 12:00, 13:00 – 16:00</span>
+              </label>
+              <textarea id="editHoursText"></textarea>
+            </div>
+            <div class="edit-actions">
+              <button id="saveHoursBtn" class="btn-primary">Uložit hodiny</button>
+            </div>
+          </div>
+        </div>
+
+        <hr style="margin:1.3rem 0; border:none; border-top:1px solid #e5e7eb;">
+
+        <div>
+          <div class="section-title">
+            <span>Nabízené služby</span>
+          </div>
+          <ul id="servicesList" class="services-list"></ul>
+
+          <div class="chips" id="chipsContainer"></div>
+
+          <div id="servicesEdit" class="admin-section">
+            <h3>Úprava služeb</h3>
+            <div class="edit-field">
+              <label for="editServicesText">Jedna služba na každý řádek</label>
+              <textarea id="editServicesText"></textarea>
+            </div>
+
+            <h3 style="margin-top:0.9rem;">Štítky pod službami</h3>
+            <div class="edit-field">
+              <label for="editChipsText">
+                Krátké štítky – každý na vlastní řádek (např. „Objednání telefonicky“)
+              </label>
+              <textarea id="editChipsText"></textarea>
+            </div>
+
+            <div class="edit-actions">
+              <button id="saveServicesBtn" class="btn-primary">Uložit služby a štítky</button>
+            </div>
+          </div>
+        </div>
+
+        <hr style="margin:1.3rem 0; border:none; border-top:1px solid #e5e7eb;">
+
+        <div>
+          <div class="section-title">
+            <span>Kontakt</span>
+          </div>
+          <p style="font-size:0.9rem; margin:0 0 0.25rem;">
+            Adresa: <strong id="contactAddress">Pražská 2198, 256 01 Benešov u Prahy</strong>
+          </p>
+          <p style="font-size:0.9rem; margin:0 0 0.25rem;">
+            Telefon: <strong id="contactPhone">+420 317 727 260</strong>
+          </p>
+          <p style="font-size:0.9rem; margin:0;">
+            E-mail: <strong id="contactEmail">r.sovjak@seznam.cz</strong>
+          </p>
+
+          <div id="contactEdit" class="admin-section">
+            <h3>Úprava kontaktu</h3>
+            <div class="edit-grid">
+              <div class="edit-field">
+                <label for="editContactAddress">Adresa</label>
+                <input id="editContactAddress" type="text" />
+              </div>
+              <div class="edit-field">
+                <label for="editContactPhone">Telefon</label>
+                <input id="editContactPhone" type="text" />
+              </div>
+              <div class="edit-field">
+                <label for="editContactEmail">E-mail</label>
+                <input id="editContactEmail" type="text" />
+              </div>
+            </div>
+            <div class="edit-actions">
+              <button id="saveContactBtn" class="btn-primary">Uložit kontakt</button>
+            </div>
+          </div>
+        </div>
+
+        <hr style="margin:1.3rem 0; border:none; border-top:1px solid #e5e7eb;">
+
+        <div>
+          <div class="section-title">
+            <span>Kde nás najdete</span>
+          </div>
+          <p class="muted" style="font-size:0.9rem; margin:0 0 0.4rem;">
+            Budova ordinace. Fotku můžeš vyměnit za vlastní soubor.
+          </p>
+          <img id="placePhoto" src="ordinace-benesov.jpg" alt="Budova ordinace" class="place-photo">
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div>&copy; <span id="year"></span> Ordinace Dr. Richarda Sovjaka</div>
+      <div class="muted">Informace bez záruky, prosíme ověřte telefonicky.</div>
+    </div>
+  </footer>
 </div>
 
-<!-- LOGIN BOX -->
-<div class="login-container">
-    <h2>Přihlášení lékaře</h2>
-
-    <input id="email" type="email" placeholder="E-mail" />
-    <input id="password" type="password" placeholder="Heslo" />
-
-    <button class="btn" onclick="login()">Přihlásit</button>
-
-    <p id="errorMessage" style="color:red; margin-top:10px;"></p>
-</div>
-
-<!-- FIREBASE -->
+<!-- Firebase SDK (compat) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyCyc-7VNuWcidcddX_jV3lLFFxWdBZwYfo",
-        authDomain: "ordinace-sovjak.firebaseapp.com",
-        projectId: "ordinace-sovjak",
-        storageBucket: "ordinace-sovjak.appspot.com",
-        messagingSenderId: "656278375840",
-        appId: "1:656278375840:web:b46c55823d1b94b3de8c65"
-    };
+  // TVŮJ FIREBASE PROJEKT – tyto hodnoty už máš v konzoli
+  const firebaseConfig = {
+    apiKey: "AIzaSyCcv-7NVwciiddr0X_jV3LLFrfxWDZwYfo",
+    authDomain: "ordinace-sovjak.firebaseapp.com",
+    projectId: "ordinace-sovjak",
+    storageBucket: "ordinace-sovjak.appspot.com",
+    messagingSenderId: "656278375840",
+    appId: "1:656278375840:web:b46c55823d1b94b3de8c65",
+    measurementId: "G-6DkHBRY4TP"
+  };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
 
-    function login() {
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
+  const STATUS_CONFIG = {
+    open:     { text: "Ordinace je dnes otevřená.", className: "status-open" },
+    closed:   { text: "Dnes neordinuji.", className: "status-closed" },
+    vacation: { text: "Dovolená – ordinace uzavřena.", className: "status-closed" },
+    info:     { text: "Mimo ordinaci – informace v textu níže.", className: "status-info" }
+  };
 
-        auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-            window.location.href = "admin.html"; // sem dáme nový admin panel
-        })
-        .catch(err => {
-            document.getElementById("errorMessage").innerText = "Chyba: " + err.message;
-        });
+  const statusPill     = document.getElementById("statusPill");
+  const statusTextEl   = document.getElementById("statusText");
+  const statusExtraEl  = document.getElementById("statusExtra");
+  const lastUpdateEl   = document.getElementById("lastUpdate");
+  const yearEl         = document.getElementById("year");
+  yearEl.textContent   = new Date().getFullYear();
+
+  const statusButtons  = document.getElementById("statusButtons");
+  const noteEdit       = document.getElementById("noteEdit");
+  const noteTextarea   = document.getElementById("noteTextarea");
+  const saveNoteBtn    = document.getElementById("saveNoteBtn");
+
+  const loginToggle  = document.getElementById("loginToggle");
+  const loginPanel   = document.getElementById("loginPanel");
+  const loginBtn     = document.getElementById("loginBtn");
+  const logoutBtn    = document.getElementById("logoutBtn");
+  const loginMsg     = document.getElementById("loginMsg");
+  const emailInput   = document.getElementById("emailInput");
+  const passwordInput= document.getElementById("passwordInput");
+
+  const headerTitleEl    = document.getElementById("headerTitle");
+  const headerSubtitleEl = document.getElementById("headerSubtitle");
+  const doctorNameEl     = document.getElementById("doctorName");
+  const doctorTitleEl    = document.getElementById("doctorTitle");
+  const introTextEl      = document.getElementById("introText");
+
+  const editDoctorName     = document.getElementById("editDoctorName");
+  const editDoctorTitle    = document.getElementById("editDoctorTitle");
+  const editHeaderTitle    = document.getElementById("editHeaderTitle");
+  const editHeaderSubtitle = document.getElementById("editHeaderSubtitle");
+  const editIntroText      = document.getElementById("editIntroText");
+  const saveHeaderBtn      = document.getElementById("saveHeaderBtn");
+
+  const hoursTable   = document.getElementById("hoursTable");
+  const editHoursText= document.getElementById("editHoursText");
+  const saveHoursBtn = document.getElementById("saveHoursBtn");
+
+  const servicesList   = document.getElementById("servicesList");
+  const editServicesText = document.getElementById("editServicesText");
+  const editChipsText    = document.getElementById("editChipsText");
+  const chipsContainer   = document.getElementById("chipsContainer");
+  const saveServicesBtn  = document.getElementById("saveServicesBtn");
+
+  const contactAddressEl   = document.getElementById("contactAddress");
+  const contactPhoneEl     = document.getElementById("contactPhone");
+  const contactEmailEl     = document.getElementById("contactEmail");
+  const editContactAddress = document.getElementById("editContactAddress");
+  const editContactPhone   = document.getElementById("editContactPhone");
+  const editContactEmail   = document.getElementById("editContactEmail");
+  const saveContactBtn     = document.getElementById("saveContactBtn");
+
+  const contentEdit = document.getElementById("contentEdit");
+  const hoursEdit   = document.getElementById("hoursEdit");
+  const servicesEdit= document.getElementById("servicesEdit");
+  const contactEdit = document.getElementById("contactEdit");
+
+  let isDoctor = false;
+  let lastData = null;
+
+  function setDoctorMode(enabled) {
+    isDoctor = enabled;
+    document.querySelectorAll(".admin-section").forEach(el => {
+      el.style.display = enabled ? "block" : "none";
+    });
+    logoutBtn.style.display = enabled ? "inline-block" : "none";
+    loginBtn.style.display  = enabled ? "none" : "inline-block";
+    loginMsg.textContent    = enabled ? "Přihlášeno." : "";
+    loginToggle.textContent = enabled ? "Správa ordinace (přihlášeno)" : "Přihlásit lékaře";
+  }
+
+  loginToggle.addEventListener("click", () => {
+    loginPanel.style.display = loginPanel.style.display === "block" ? "none" : "block";
+  });
+
+  loginBtn.addEventListener("click", async () => {
+    loginMsg.textContent = "Přihlašuji…";
+    try {
+      await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
+    } catch (e) {
+      console.error(e);
+      loginMsg.textContent = "Chyba přihlášení: zkontrolujte e-mail a heslo.";
     }
-</script>
+  });
 
+  logoutBtn.addEventListener("click", async () => {
+    await auth.signOut();
+  });
+
+  auth.onAuthStateChanged(user => {
+    setDoctorMode(!!user);
+  });
+
+  const docRef = db.collection("ordinace").doc("sovjak");
+
+  function renderStatus(data) {
+    const statusKey = data.status || "open";
+    const conf = STATUS_CONFIG[statusKey] || STATUS_CONFIG.open;
+
+    statusPill.classList.remove("status-open", "status-closed", "status-info");
+    statusPill.classList.add(conf.className);
+    statusTextEl.textContent  = conf.text;
+    statusExtraEl.textContent = data.note || "";
+    noteTextarea.value        = data.note || "";
+    lastUpdateEl.textContent  = data.updatedAt || "—";
+  }
+
+  function renderHeader(data) {
+    headerTitleEl.textContent    = data.headerTitle   || "Ordinace Dr. Richarda Sovjaka";
+    headerSubtitleEl.textContent = data.headerSubtitle|| "Praktický lékař – aktuální informace pro pacienty";
+    doctorNameEl.textContent     = data.doctorName    || "Dr. Richard Sovjak";
+    doctorTitleEl.textContent    = data.doctorTitle   || "Praktický lékař pro dospělé";
+    introTextEl.textContent      = data.introText     || "Informace o provozu ordinace a aktuálních změnách.";
+
+    editDoctorName.value     = doctorNameEl.textContent;
+    editDoctorTitle.value    = doctorTitleEl.textContent;
+    editHeaderTitle.value    = headerTitleEl.textContent;
+    editHeaderSubtitle.value = headerSubtitleEl.textContent;
+    editIntroText.value      = data.introText || "";
+  }
+
+  function renderHours(data) {
+    const text = data.hoursText || [
+      "Pondělí: 8:00 – 12:00, 13:00 – 16:00",
+      "Úterý: 7:30 – 12:00",
+      "Středa: 8:00 – 12:00, 13:00 – 17:00",
+      "Čtvrtek: 8:00 – 12:00",
+      "Pátek: 8:00 – 12:00"
+    ].join("\n");
+
+    editHoursText.value = text;
+
+    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+    hoursTable.innerHTML = "";
+    lines.forEach(line => {
+      const parts = line.split(":");
+      const day = parts[0] ? parts[0].trim() : "";
+      const val = parts[1] ? parts.slice(1).join(":").trim() : "";
+      if (!day) return;
+      const tr  = document.createElement("tr");
+      const td1 = document.createElement("td");
+      const td2 = document.createElement("td");
+      td1.textContent = day;
+      td2.textContent = val;
+      tr.appendChild(td1);
+      tr.appendChild(td2);
+      hoursTable.appendChild(tr);
+    });
+  }
+
+  function renderServices(data) {
+    const text = data.servicesText || [
+      "Komplexní péče praktického lékaře pro dospělé",
+      "Preventivní prohlídky a očkování",
+      "Vyšetření pro řidičské a zbrojní průkazy",
+      "Posudky o zdravotní způsobilosti (zaměstnání, školy)"
+    ].join("\n");
+
+    editServicesText.value = text;
+
+    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+    servicesList.innerHTML = "";
+    lines.forEach(line => {
+      const li = document.createElement("li");
+      li.textContent = line;
+      servicesList.appendChild(li);
+    });
+  }
+
+  function renderChips(data) {
+    const text = data.chipsText || [
+      "Objednání telefonicky",
+      "Akutní pacienti",
+      "Očkování proti chřipce"
+    ].join("\n");
+
+    editChipsText.value = text;
+
+    const labels = text.split("\n").map(l => l.trim()).filter(Boolean);
+    chipsContainer.innerHTML = "";
+    labels.forEach(label => {
+      const div = document.createElement("div");
+      div.className = "chip";
+      div.textContent = label;
+      chipsContainer.appendChild(div);
+    });
+  }
+
+  function renderContact(data) {
+    contactAddressEl.textContent = data.contactAddress || "Pražská 2198, 256 01 Benešov u Prahy";
+    contactPhoneEl.textContent   = data.contactPhone   || "+420 317 727 260";
+    contactEmailEl.textContent   = data.contactEmail   || "r.sovjak@seznam.cz";
+
+    editContactAddress.value = contactAddressEl.textContent;
+    editContactPhone.value   = contactPhoneEl.textContent;
+    editContactEmail.value   = contactEmailEl.textContent;
+  }
+
+  function renderAll(data) {
+    renderStatus(data);
+    renderHeader(data);
+    renderHours(data);
+    renderServices(data);
+    renderChips(data);
+    renderContact(data);
+  }
+
+  async function updateData(partial) {
+    if (!lastData) {
+      alert("Data ještě nejsou načtena, zkuste obnovit stránku.");
+      return;
+    }
+    const newData = Object.assign({}, lastData, partial);
+    lastData = newData;
+    await docRef.set(newData);
+  }
+
+  docRef.onSnapshot(async doc => {
+    if (!doc.exists) {
+      const init = {
+        status: "open",
+        note: "",
+        hoursText: "",
+        servicesText: "",
+        chipsText: "",
+        contactAddress: "Pražská 2198, 256 01 Benešov u Prahy",
+        contactPhone: "+420 317 727 260",
+        contactEmail: "r.sovjak@seznam.cz",
+        updatedAt: new Date().toLocaleString("cs-CZ")
+      };
+      await docRef.set(init);
+      return;
+    }
+    lastData = doc.data();
+    renderAll(lastData);
+  }, err => {
+    console.error(err);
+    statusTextEl.textContent = "Nepodařilo se načíst data.";
+  });
+
+  document.querySelectorAll(".status-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      if (!isDoctor) { alert("Musíte být přihlášen jako lékař."); return; }
+      const statusKey = btn.getAttribute("data-status");
+      const now = new Date().toLocaleString("cs-CZ");
+      try {
+        await updateData({ status: statusKey, updatedAt: now });
+      } catch (e) {
+        console.error(e);
+        alert("Chyba při ukládání stavu.");
+      }
+    });
+  });
+
+  saveNoteBtn.addEventListener("click", async () => {
+    if (!isDoctor) { alert("Musíte být přihlášen jako lékař."); return; }
+    const now = new Date().toLocaleString("cs-CZ");
+    try {
+      await updateData({ note: noteTextarea.value.trim(), updatedAt: now });
+    } catch (e) {
+      console.error(e);
+      alert("Chyba při ukládání zprávy.");
+    }
+  });
+
+  saveHeaderBtn.addEventListener("click", async () => {
+    if (!isDoctor) { alert("Musíte být přihlášen jako lékař."); return; }
+    const now = new Date().toLocaleString("cs-CZ");
+    try {
+      await updateData({
+        doctorName:     editDoctorName.value.trim(),
+        doctorTitle:    editDoctorTitle.value.trim(),
+        headerTitle:    editHeaderTitle.value.trim(),
+        headerSubtitle: editHeaderSubtitle.value.trim(),
+        introText:      editIntroText.value.trim(),
+        updatedAt:      now
+      });
+    } catch (e) {
+      console.error(e);
+      alert("Chyba při ukládání textů.");
+    }
+  });
+
+  saveHoursBtn.addEventListener("click", async () => {
+    if (!isDoctor) { alert("Musíte být přihlášen jako lékař."); return; }
+    const now = new Date().toLocaleString("cs-CZ");
+    try {
+      await updateData({ hoursText: editHoursText.value, updatedAt: now });
+    } catch (e) {
+      console.error(e);
+      alert("Chyba při ukládání hodin.");
+    }
+  });
+
+  saveServicesBtn.addEventListener("click", async () => {
+    if (!isDoctor) { alert("Musíte být přihlášen jako lékař."); return; }
+    const now = new Date().toLocaleString("cs-CZ");
+    try {
+      await updateData({
+        servicesText: editServicesText.value,
+        chipsText:    editChipsText.value,
+        updatedAt:    now
+      });
+    } catch (e) {
+      console.error(e);
+      alert("Chyba při ukládání služeb/štítků.");
+    }
+  });
+
+  saveContactBtn.addEventListener("click", async () => {
+    if (!isDoctor) { alert("Musíte být přihlášen jako lékař."); return; }
+    const now = new Date().toLocaleString("cs-CZ");
+    try {
+      await updateData({
+        contactAddress: editContactAddress.value.trim(),
+        contactPhone:   editContactPhone.value.trim(),
+        contactEmail:   editContactEmail.value.trim(),
+        updatedAt:      now
+      });
+    } catch (e) {
+      console.error(e);
+      alert("Chyba při ukládání kontaktu.");
+    }
+  });
+</script>
 </body>
 </html>
