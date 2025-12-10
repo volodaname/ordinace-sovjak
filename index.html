@@ -30,7 +30,7 @@
       background-image: url("header-bg-medical.jpg");
       background-size: cover;
       background-position: center;
-      opacity: 0.6;           /* klidně si později doladíš (0.4–0.8) */
+      opacity: 0.6;
       pointer-events: none;
     }
     header .container {
@@ -57,7 +57,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(15,23,42,0.65);
+      background: rgba(15,23,42,0.8);
       padding: 4px;
     }
     .logo-icon svg {
@@ -139,9 +139,44 @@
       color: #374151;
     }
 
+    /* === PŘEPÍNAČ ORDINACÍ ===================================== */
+    .ordinace-switch-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.25rem 0.2rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .ordinace-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      color: #4b5563;
+    }
+    .ordinace-buttons {
+      display: inline-flex;
+      gap: 0.4rem;
+    }
+    .ordinace-btn {
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      padding: 0.25rem 0.8rem;
+      font-size: 0.82rem;
+      background: #f9fafb;
+      cursor: pointer;
+    }
+    .ordinace-btn.active {
+      background: #1d4ed8;
+      color: #f9fafb;
+      border-color: #1d4ed8;
+    }
+
     /* === OBSAH ================================================== */
     main {
-      padding: 1.3rem 1.25rem 2.4rem;
+      padding: 0.6rem 1.25rem 2.4rem;
     }
     .content {
       max-width: 1100px;
@@ -154,7 +189,8 @@
       .content {
         grid-template-columns: minmax(0, 1fr);
       }
-      .login-panel-wrapper {
+      .login-panel-wrapper,
+      .ordinace-switch-wrap {
         padding: 0 1.25rem;
       }
     }
@@ -385,7 +421,7 @@
     <div class="container">
       <div class="logo">
         <div class="logo-icon">
-          <!-- Ostré RS logo v SVG -->
+          <!-- RS logo v SVG -->
           <svg viewBox="0 0 64 64" aria-hidden="true">
             <circle cx="32" cy="32" r="27" fill="none" stroke-width="2.8" class="logo-ring" />
             <circle cx="32" cy="30" r="19" fill="rgba(15,23,42,0.9)" />
@@ -422,6 +458,18 @@
       </div>
     </div>
   </header>
+
+  <!-- přepínač ordinací -->
+  <div class="ordinace-switch-wrap">
+    <div class="ordinace-switch">
+      <span>Ordinace:</span>
+      <div class="ordinace-buttons">
+        <button class="ordinace-btn active" data-ordinace="benesov">Benešov</button>
+        <button class="ordinace-btn" data-ordinace="naceradec">Načeradec</button>
+      </div>
+    </div>
+    <div class="muted" id="ordinaceLabel">Zobrazená ordinace: Benešov</div>
+  </div>
 
   <main>
     <div class="content">
@@ -629,7 +677,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
 <script>
-  // TVŮJ FIREBASE PROJEKT – tyto hodnoty už máš v konzoli
   const firebaseConfig = {
   apiKey: "AIzaSyCcv-7VNuwciddrdX_jV3lLFfxdW0Zvfyo",
   authDomain: "ordinace-sovjak.firebaseapp.com",
@@ -651,12 +698,32 @@
     info:     { text: "Mimo ordinaci – informace v textu níže.", className: "status-info" }
   };
 
+  const ORDINACE_META = {
+    benesov: {
+      label: "Benešov",
+      photo: "ordinace-benesov.jpg",
+      defaultAddress: "Pražská 2198, 256 01 Benešov u Prahy"
+    },
+    naceradec: {
+      label: "Načeradec",
+      photo: "ordinace-naceradec.jpg",
+      defaultAddress: "Načeradec – doplňte adresu",
+    }
+  };
+
+  let currentOrdinace = "benesov";
+  let unsubscribe = null;
+  let lastData = null;
+  let isDoctor = false;
+
   const statusPill     = document.getElementById("statusPill");
   const statusTextEl   = document.getElementById("statusText");
   const statusExtraEl  = document.getElementById("statusExtra");
   const lastUpdateEl   = document.getElementById("lastUpdate");
   const yearEl         = document.getElementById("year");
   yearEl.textContent   = new Date().getFullYear();
+  const placePhoto     = document.getElementById("placePhoto");
+  const ordinaceLabel  = document.getElementById("ordinaceLabel");
 
   const statusButtons  = document.getElementById("statusButtons");
   const noteEdit       = document.getElementById("noteEdit");
@@ -707,9 +774,6 @@
   const servicesEdit= document.getElementById("servicesEdit");
   const contactEdit = document.getElementById("contactEdit");
 
-  let isDoctor = false;
-  let lastData = null;
-
   function setDoctorMode(enabled) {
     isDoctor = enabled;
     document.querySelectorAll(".admin-section").forEach(el => {
@@ -743,7 +807,15 @@
     setDoctorMode(!!user);
   });
 
-  const docRef = db.collection("ordinace").doc("sovjak");
+  function getDocRef() {
+    return db.collection("ordinace").doc(currentOrdinace);
+  }
+
+  function setOrdinaceMeta() {
+    const meta = ORDINACE_META[currentOrdinace];
+    placePhoto.src = meta.photo;
+    ordinaceLabel.textContent = "Zobrazená ordinace: " + meta.label;
+  }
 
   function renderStatus(data) {
     const statusKey = data.status || "open";
@@ -839,7 +911,8 @@
   }
 
   function renderContact(data) {
-    contactAddressEl.textContent = data.contactAddress || "Pražská 2198, 256 01 Benešov u Prahy";
+    const meta = ORDINACE_META[currentOrdinace];
+    contactAddressEl.textContent = data.contactAddress || meta.defaultAddress;
     contactPhoneEl.textContent   = data.contactPhone   || "+420 317 727 260";
     contactEmailEl.textContent   = data.contactEmail   || "r.sovjak@seznam.cz";
 
@@ -864,32 +937,50 @@
     }
     const newData = Object.assign({}, lastData, partial);
     lastData = newData;
-    await docRef.set(newData);
+    await getDocRef().set(newData);
   }
 
-  docRef.onSnapshot(async doc => {
-    if (!doc.exists) {
-      const init = {
-        status: "open",
-        note: "",
-        hoursText: "",
-        servicesText: "",
-        chipsText: "",
-        contactAddress: "Pražská 2198, 256 01 Benešov u Prahy",
-        contactPhone: "+420 317 727 260",
-        contactEmail: "r.sovjak@seznam.cz",
-        updatedAt: new Date().toLocaleString("cs-CZ")
-      };
-      await docRef.set(init);
-      return;
-    }
-    lastData = doc.data();
-    renderAll(lastData);
-  }, err => {
-    console.error(err);
-    statusTextEl.textContent = "Nepodařilo se načíst data.";
+  function attachListener() {
+    if (unsubscribe) unsubscribe();
+    setOrdinaceMeta();
+    getDocRef().onSnapshot(async doc => {
+      if (!doc.exists) {
+        const meta = ORDINACE_META[currentOrdinace];
+        const init = {
+          status: "open",
+          note: "",
+          hoursText: "",
+          servicesText: "",
+          chipsText: "",
+          contactAddress: meta.defaultAddress,
+          contactPhone: "+420 317 727 260",
+          contactEmail: "r.sovjak@seznam.cz",
+          updatedAt: new Date().toLocaleString("cs-CZ")
+        };
+        await getDocRef().set(init);
+        return;
+      }
+      lastData = doc.data();
+      renderAll(lastData);
+    }, err => {
+      console.error(err);
+      statusTextEl.textContent = "Nepodařilo se načíst data.";
+    });
+  }
+
+  // přepínač ordinací
+  document.querySelectorAll(".ordinace-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-ordinace");
+      if (id === currentOrdinace) return;
+      document.querySelectorAll(".ordinace-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentOrdinace = id;
+      attachListener();
+    });
   });
 
+  // status tlačítka
   document.querySelectorAll(".status-btn").forEach(btn => {
     btn.addEventListener("click", async () => {
       if (!isDoctor) { alert("Musíte být přihlášen jako lékař."); return; }
@@ -974,7 +1065,9 @@
       alert("Chyba při ukládání kontaktu.");
     }
   });
+
+  // start
+  attachListener();
 </script>
 </body>
 </html>
-
